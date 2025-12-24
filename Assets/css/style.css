@@ -617,4 +617,211 @@ button { border: none; background: none; cursor: pointer; font-family: inherit; 
     
     .product-info h3 { font-size: 0.85rem; }
 }
+/* ==========================================================================
+   10. PRODUCT DETAIL PAGE (Ficha de Producto)
+   ========================================================================== */
+.product-page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    min-height: 80vh; /* Para que no quede vacío si carga lento */
+}
+
+/* Breadcrumb */
+.breadcrumb {
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.breadcrumb a { text-decoration: underline; }
+
+/* Grid Principal (Layout) */
+.product-detail {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr; /* Foto más grande que el texto (1.2 vs 1) */
+    gap: 60px;
+    margin-bottom: 80px;
+}
+
+/* Galería (Izquierda) */
+.product-gallery {
+    position: relative;
+}
+
+.main-image-container {
+    width: 100%;
+    background: #f4f4f4;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    aspect-ratio: 4/5;
+}
+
+.main-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Panel de Info (Derecha) */
+.product-info-panel {
+    /* Sticky: Se queda fijo si scrolleas fotos muy largas */
+    position: sticky;
+    top: 100px; 
+    height: fit-content;
+}
+
+.p-title {
+    font-family: var(--font-display);
+    font-size: 3rem;
+    line-height: 1;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+}
+
+.p-price-container {
+    margin-bottom: 30px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 20px;
+}
+
+.p-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: block;
+}
+
+.p-installments {
+    color: var(--color-accent);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.p-description {
+    font-size: 0.95rem;
+    color: #555;
+    margin-bottom: 30px;
+    line-height: 1.8;
+}
+
+/* Selector de Talles */
+.p-selector { margin-bottom: 30px; }
+
+.selector-label {
+    display: block;
+    font-weight: 700;
+    font-size: 0.8rem;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+
+.size-options {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.size-btn {
+    width: 50px;
+    height: 50px;
+    border: 1px solid #ddd;
+    background: #fff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: 0.2s;
+}
+
+.size-btn:hover { border-color: #000; }
+
+/* Clase para cuando está seleccionado un talle */
+.size-btn.selected {
+    background: #000;
+    color: #fff;
+    border-color: #000;
+}
+
+.size-guide-link {
+    font-size: 0.8rem;
+    text-decoration: underline;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+/* Botones de Acción */
+.p-actions {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 40px;
+}
+
+.quantity-selector {
+    display: flex;
+    border: 1px solid #000;
+    height: 50px;
+    width: 100px;
+}
+
+.quantity-selector button {
+    width: 30px;
+    font-size: 1.2rem;
+    background: #fff;
+}
+
+.quantity-selector input {
+    width: 40px;
+    border: none;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1rem;
+    outline: none;
+}
+
+.btn-add-cart {
+    flex-grow: 1; /* Ocupa el resto del espacio */
+    background: #000;
+    color: #fff;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    height: 50px;
+    transition: 0.3s;
+}
+
+.btn-add-cart:hover {
+    background: #333;
+}
+
+/* Info Extra (Iconos) */
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+/* RESPONSIVE MÓVIL */
+@media (max-width: 900px) {
+    .product-detail {
+        grid-template-columns: 1fr; /* Una sola columna */
+        gap: 30px;
+    }
+    
+    .p-title { font-size: 2.2rem; }
+    
+    .p-actions {
+        position: fixed; /* Botón pegado abajo tipo App */
+        bottom: 0; left: 0; width: 100%;
+        background: #fff;
+        padding: 15px;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+        z-index: 100;
+        margin-bottom: 0;
+    }
+}
 
