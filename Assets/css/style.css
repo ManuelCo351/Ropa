@@ -1,51 +1,49 @@
-
 /* ==========================================================================
    1. VARIABLES & CONFIGURACIÓN GLOBAL (El ADN de la Marca)
    ========================================================================== */
 :root {
     /* --- PALETA DE COLORES --- */
     --color-bg: #ffffff;             /* Fondo general */
-    --color-text: #111111;           /* Negro "Off-Black" (Más elegante que el #000 puro) */
-    --color-text-light: #666666;     /* Gris para subtítulos */
-    --color-accent: #5d6d45;         /* Verde Oliva (Tierra Santa / Esencia) */
-    --color-error: #d32f2f;          /* Para errores en formularios */
+    --color-text: #111111;           /* Negro suave */
+    --color-text-light: #666666;     /* Gris para textos secundarios */
+    --color-accent: #5d6d45;         /* Verde Oliva (Identidad Hijo Pródigo) */
+    --color-border: rgba(0,0,0,0.08); /* Bordes sutiles */
     
     /* --- TIPOGRAFÍA --- */
-    --font-primary: 'Montserrat', sans-serif;         /* Lectura, Menús, Botones */
-    --font-display: 'UnifrakturMaguntia', cursive;    /* Títulos Impactantes, Logo */
+    --font-primary: 'Montserrat', sans-serif;         /* Lectura y Menús */
+    --font-display: 'UnifrakturMaguntia', cursive;    /* Títulos Góticos */
     
-    /* --- TAMAÑOS & ESPACIADOS --- */
-    --header-height: 80px;           /* Altura fija del menú */
-    --container-width: 1440px;       /* Ancho máximo en pantallas gigantes */
-    --border-radius: 4px;            /* Bordes apenas redondeados (Estilo serio) */
+    /* --- MEDIDAS --- */
+    --header-height: 80px;           /* Altura del menú */
+    --container-width: 1440px;       /* Ancho máximo de la web */
     
     /* --- ANIMACIONES --- */
     --transition-fast: 0.2s ease;
-    --transition-smooth: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Curva de movimiento premium */
+    --transition-smooth: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* --- RESET & BASE --- */
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box; /* Fundamental para que los paddings no rompan el ancho */
+    box-sizing: border-box;
 }
 
 html {
-    scroll-behavior: smooth; /* Scroll suave al tocar links ancla */
-    font-size: 16px; /* Base size */
+    scroll-behavior: smooth;
+    font-size: 16px; 
 }
 
 body {
     background-color: var(--color-bg);
     color: var(--color-text);
     font-family: var(--font-primary);
-    -webkit-font-smoothing: antialiased; /* Texto nítido en Mac/iPhone */
+    -webkit-font-smoothing: antialiased; /* Texto nítido en iPhone/Mac */
     line-height: 1.6;
-    overflow-x: hidden; /* Evita scroll horizontal indeseado */
+    overflow-x: hidden;
 }
 
-a { text-decoration: none; color: inherit; }
+a { text-decoration: none; color: inherit; transition: var(--transition-fast); }
 ul { list-style: none; }
 button { border: none; background: none; cursor: pointer; font-family: inherit; }
 
@@ -53,59 +51,64 @@ button { border: none; background: none; cursor: pointer; font-family: inherit; 
    2. MARQUEE INFINITO (Cinta Superior)
    ========================================================================== */
 .marquee-container {
-    background-color: #000; /* Fondo negro absoluto */
+    background-color: #000;
     color: #fff;
-    padding: 10px 0;
+    padding: 9px 0;
     overflow: hidden;
     position: relative;
-    z-index: 1002; /* Por encima de todo */
+    z-index: 1002;
     border-bottom: 1px solid #222;
 }
 
 .marquee-content {
     display: inline-block;
-    white-space: nowrap; /* Impide que el texto baje de renglón */
-    font-size: 0.75rem;
+    white-space: nowrap;
+    font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 2px;
     text-transform: uppercase;
     
-    /* LA ANIMACIÓN */
-    animation: scrollText 25s linear infinite;
-    /* Truco para GPU: */
+    /* Animación Infinita */
+    animation: scrollText 30s linear infinite;
     will-change: transform; 
 }
 
 @keyframes scrollText {
     0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); } /* Se mueve hasta la mitad para hacer loop perfecto */
+    100% { transform: translateX(-50%); }
 }
 
 /* ==========================================================================
-   3. HEADER PRINCIPAL (Navegación)
+   3. HEADER PRINCIPAL (Navegación Sticky)
    ========================================================================== */
 .main-header {
     height: var(--header-height);
     width: 100%;
-    position: sticky; /* Se queda pegado arriba */
+    position: sticky;
     top: 0;
     z-index: 1000;
     
     /* EFECTO VIDRIO (Glassmorphism) */
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(12px); /* Desenfoca lo que pasa por atrás */
-    border-bottom: 1px solid rgba(0,0,0,0.05);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px); 
+    border-bottom: 1px solid var(--color-border);
     
     display: flex;
     align-items: center;
     transition: var(--transition-smooth);
 }
 
+/* Cuando se hace scroll, el header se achica un poco (JS requerido) */
+.main-header.scrolled {
+    height: 65px;
+    background: rgba(255, 255, 255, 0.98);
+}
+
 .container-fluid {
     width: 100%;
     max-width: var(--container-width);
     margin: 0 auto;
-    padding: 0 20px; /* Margen a los costados en móvil */
+    padding: 0 25px;
 }
 
 .nav-wrapper {
@@ -116,78 +119,73 @@ button { border: none; background: none; cursor: pointer; font-family: inherit; 
 
 /* --- LOGO --- */
 .brand-logo a {
-    font-family: var(--font-display); /* Fuente Gótica */
-    font-size: 2rem; /* Tamaño grande */
+    font-family: var(--font-display);
+    font-size: 2.2rem;
     letter-spacing: 1px;
     color: var(--color-text);
-    transition: var(--transition-fast);
 }
 
-.brand-logo a:hover {
-    color: var(--color-accent); /* Se pinta de verde al pasar el mouse */
-}
+.brand-logo a:hover { color: var(--color-accent); }
 
 /* --- MENÚ ESCRITORIO --- */
 .desktop-nav {
     display: flex;
-    gap: 40px; /* Espacio entre items */
+    gap: 35px;
 }
 
 .nav-link {
-    font-size: 0.85rem;
-    font-weight: 500;
+    font-size: 0.8rem;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1.5px;
     position: relative;
     padding: 5px 0;
 }
 
-/* Animación de subrayado elegante */
+/* Subrayado animado */
 .nav-link::after {
     content: '';
     position: absolute;
     bottom: 0;
     left: 0;
-    width: 0; /* Empieza invisible */
+    width: 0;
     height: 1px;
     background-color: var(--color-accent);
     transition: width 0.3s ease;
 }
 
-.nav-link:hover::after {
-    width: 100%; /* Se llena al 100% */
-}
+.nav-link:hover::after { width: 100%; }
 
-/* --- ICONOS DE ACCIÓN (Derecha) --- */
+/* --- ICONOS DE ACCIÓN --- */
 .nav-actions {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 15px;
 }
 
 .icon-btn {
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     color: var(--color-text);
-    display: flex; /* Para centrar el icono */
+    display: flex;
     align-items: center;
     transition: transform 0.2s;
 }
 
 .icon-btn:hover {
-    transform: scale(1.1); /* Zoom sutil */
+    transform: scale(1.1);
     color: var(--color-text-light);
 }
 
-/* Badge del Carrito */
+/* Badge Carrito */
 .cart-trigger { position: relative; }
 
 .cart-badge {
     position: absolute;
     top: -5px;
     right: -6px;
-    background-color: var(--color-accent); /* Verde Oliva */
+    background-color: var(--color-accent);
     color: #fff;
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     font-weight: 700;
     height: 18px;
     width: 18px;
@@ -197,35 +195,233 @@ button { border: none; background: none; cursor: pointer; font-family: inherit; 
     justify-content: center;
 }
 
-/* --- MENU TOGGLE (Móvil) --- */
+/* --- TOGGLE MÓVIL (Hamburguesa) --- */
 .menu-toggle {
-    display: none; /* Oculto por defecto en PC */
+    display: none; /* Oculto en PC */
     font-size: 1.8rem;
+    color: var(--color-text);
 }
 
 /* ==========================================================================
-   4. RESPONSIVE (Ajustes para Celular)
+   4. RESPONSIVE HEADER (Celulares y Tablets)
    ========================================================================== */
 @media (max-width: 992px) {
-    /* En pantallas menores a 992px (Tablets y Celus) */
     
-    .desktop-nav {
-        display: none; /* Ocultamos el menú de texto */
+    /* Ajustes generales */
+    :root { --header-height: 60px; }
+    
+    .desktop-nav { display: none; } /* Chau menú texto */
+    .menu-toggle { display: block; } /* Hola hamburguesa */
+    .hide-mobile { display: none; } /* Ocultar icono usuario */
+    
+    .brand-logo a { font-size: 1.8rem; }
+    
+    /* MENÚ DESPLEGABLE (Cuando JS agrega la clase .mobile-menu-open) */
+    .main-header.mobile-menu-open .desktop-nav {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: var(--header-height);
+        left: 0;
+        width: 100%;
+        background: #fff;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border-top: 1px solid var(--color-border);
+        animation: slideDown 0.3s ease;
     }
     
-    .menu-toggle {
-        display: block; /* Mostramos la hamburguesa */
-    }
-    
-    .hide-mobile {
-        display: none; /* Ocultamos iconos extra (como Usuario) para ahorrar espacio */
-    }
-    
-    .brand-logo a {
-        font-size: 1.6rem; /* Logo un poco más chico */
-    }
-    
-    :root {
-        --header-height: 60px; /* Header más fino en celular */
+    /* Animación de caída */
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 }
+/* ==========================================================================
+   5. HERO SECTION (La Portada)
+   ========================================================================== */
+.hero-section {
+    position: relative;
+    /* 100dvh asegura que cubra el 100% del alto real del celular (incluyendo barras) */
+    height: 100dvh; 
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #fff;
+    /* Truco: Margen negativo para que la imagen empiece DESDE ARRIBA del todo, 
+       quedando por detrás del header transparente */
+    margin-top: calc(var(--header-height) * -1);
+    padding-top: var(--header-height);
+    overflow: hidden;
+}
+
+/* --- FONDO E IMAGEN --- */
+.hero-bg {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: -1; /* Se queda al fondo */
+}
+
+.parallax-img {
+    width: 100%; height: 100%;
+    object-fit: cover; /* Recorta la foto para que no se estire */
+    object-position: center;
+    /* Animación continua de zoom lento */
+    animation: zoomIn 20s infinite alternate; 
+}
+
+@keyframes zoomIn {
+    from { transform: scale(1); }
+    to { transform: scale(1.15); } /* Crece un 15% */
+}
+
+.overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    /* Degradado: Transparente arriba -> Negro abajo (para leer textos) */
+    background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.8));
+}
+
+/* --- CONTENIDO --- */
+.hero-content {
+    z-index: 2; /* Por encima de la imagen */
+    padding: 20px;
+    max-width: 900px;
+}
+
+.hero-tag {
+    display: block;
+    font-size: 0.85rem;
+    letter-spacing: 4px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: rgba(255,255,255,0.9);
+    text-transform: uppercase;
+}
+
+.hero-content h1 {
+    font-family: var(--font-display); /* Fuente Gótica */
+    font-size: 5.5rem; /* Gigante en PC */
+    line-height: 1.1;
+    margin-bottom: 25px;
+    text-shadow: 0 10px 30px rgba(0,0,0,0.5); /* Sombra para separar del fondo */
+}
+
+.hero-content p {
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    font-weight: 300;
+    margin-bottom: 40px;
+    max-width: 600px;
+    margin-left: auto; margin-right: auto;
+}
+
+/* --- BOTONES --- */
+.hero-btns {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.btn-primary {
+    padding: 16px 45px;
+    background: #fff;
+    color: #000;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 0.9rem;
+    transition: var(--transition-smooth);
+    border: 2px solid #fff;
+}
+
+.btn-primary:hover {
+    background: transparent;
+    color: #fff;
+    transform: translateY(-5px); /* Levita */
+}
+
+.btn-outline {
+    padding: 16px 45px;
+    border: 1px solid rgba(255,255,255,0.6);
+    color: #fff;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: var(--transition-smooth);
+}
+
+.btn-outline:hover {
+    background: rgba(255,255,255,0.15);
+    border-color: #fff;
+}
+
+/* --- INDICADOR SCROLL (Flecha abajo) --- */
+.scroll-indicator {
+    position: absolute;
+    bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.8);
+    animation: float 2s infinite ease-in-out;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(10px); }
+}
+
+/* ==========================================================================
+   6. ANIMACIONES DE ENTRADA (Scroll Reveal)
+   ========================================================================== */
+/* Estado inicial: Invisible y desplazado hacia abajo */
+.reveal-text {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 1s cubic-bezier(0.215, 0.610, 0.355, 1.000), 
+                transform 1s cubic-bezier(0.215, 0.610, 0.355, 1.000);
+}
+
+/* Estado activo (Agregado por JS): Visible y en su lugar */
+.reveal-text.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Retrasos para efecto escalera */
+.delay-100 { transition-delay: 0.15s; }
+.delay-200 { transition-delay: 0.3s; }
+.delay-300 { transition-delay: 0.45s; }
+
+/* ==========================================================================
+   7. RESPONSIVE HERO (Ajustes Móvil)
+   ========================================================================== */
+@media (max-width: 768px) {
+    .hero-content h1 { 
+        font-size: 3.5rem; /* Achicamos título en celu para que entre */
+    }
+    
+    .hero-content p {
+        font-size: 0.9rem;
+    }
+
+    .hero-btns { 
+        flex-direction: column; /* Botones uno abajo del otro */
+        gap: 15px; 
+        width: 100%;
+    } 
+    
+    .btn-primary, .btn-outline { 
+        width: 100%; 
+        justify-content: center; 
+    }
+   }
+
