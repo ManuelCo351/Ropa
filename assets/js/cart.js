@@ -96,8 +96,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 5. MERCADO PAGO (Protegido por si falla la clave)
     if (typeof MercadoPago !== 'undefined') {
-        const mp = new MercadoPago('TU_PUBLIC_KEY_REAL', { locale: 'es-AR' });
-
+        const mp = new MercadoPago('APP_USR-1234-5678-9012-3456', { locale: 'es-AR' });
+       
         checkoutBtn.onclick = async () => {
             if (cart.length === 0) return alert("Bolsa vacía");
             checkoutBtn.innerText = "PROCESANDO...";
