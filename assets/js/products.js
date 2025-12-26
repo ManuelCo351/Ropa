@@ -1,88 +1,65 @@
-/* ==========================================================================
-   BASE DE DATOS DE PRODUCTOS (Hijo Pródigo Ind.)
-   --------------------------------------------------------------------------
-   Instrucciones para el Cliente:
-   1. Cada bloque entre llaves { } es un producto.
-   2. Para agregar uno nuevo, copiá un bloque entero y pegalo al final, 
-      antes del corchete de cierre ].
-   3. Asegurate de poner una coma (,) después de cada llave de cierre }, 
-      menos en el último producto.
-   ========================================================================== */
-// Función para convertir imágenes a WebP automáticamente
+// ==========================================
+// CONEXIÓN CON GOOGLE SHEETS (BASE DE DATOS)
+// ==========================================
+
+// Tu link real de Google Sheets (Publicado como CSV)
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTbnEh19rwIV-ksZZBaez6Ma_XpGtSYEkz_NSOLOvrczFTkQMdn7MB4rSPDLhTBazGXfOavA4c2zq4z/pub?output=csv';
+
+// Lista global donde se guardarán los productos
+window.products = [];
+
+// Función para optimizar imágenes (WebP)
 const imgAPI = (ruta) => {
-    // Cambiá esto por TU dominio real de Vercel
+    if (!ruta) return 'assets/img/placeholder.jpg'; // Imagen por defecto si falta
+    if (ruta.startsWith('http')) return ruta; // Si ya es un link completo, dejarlo así
     const dominio = 'https://hijo-prodigo.vercel.app/'; 
     return `https://wsrv.nl/?url=${dominio}${ruta}&output=webp&q=80`;
 };
 
-const productos = [
-    {
-        id: 1,
-        nombre: "Remera 'Prodigal' Oversize",
-        precio: 28000,
-        // Categorías disponibles: 'remeras', 'hoodies', 'accesorios', 'pantalones'
-        categoria: "remeras", 
-        // Nombre exacto de la foto en la carpeta assets/img/
-        imagen: "Assets/img/remera-blanca.jpg", 
-        nuevo: true, // Si ponés true, sale la etiqueta "NUEVO"
-        cuotas: "3 cuotas sin interés"
-    },
-    {
-        id: 2,
-        nombre: "Hoodie 'Eden' Heavyweight",
-        precio: 52000,
-        categoria: "hoodies",
-        imagen: "Assets/img/hoodie-negro.jpg",
-        nuevo: true,
-        cuotas: "3 y 6 cuotas sin interés"
-    },
-    {
-        id: 3,
-        nombre: "Gorra Trucker HP Logo",
-        precio: 15000,
-        categoria: "accesorios",
-        imagen: "Assets/img/gorra.jpg",
-        nuevo: false, // false = no muestra etiqueta
-        cuotas: "3 cuotas sin interés"
-    },
-    {
-        id: 4,
-        nombre: "Remera 'Siembra' Black",
-        precio: 28000,
-        categoria: "remeras",
-        imagen: "Assets/img/remera-negra.jpg",
-        nuevo: false,
-        cuotas: "3 cuotas sin interés"
-    },
-    {
-        id: 5,
-        nombre: "Buzo Crewneck 'Fe'",
-        precio: 45000,
-        categoria: "hoodies",
-        imagen: "Assets/img/buzo-gris.jpg",
-        nuevo: true,
-        cuotas: "3 y 6 cuotas sin interés"
-    },
-    {
-        id: 6,
-        nombre: "Piluso 'Holy' Reversible",
-        precio: 12000,
-        categoria: "accesorios",
-        imagen: "Assets/img/piluso.jpg",
-        nuevo: false,
-        cuotas: null // Si no querés mostrar cuotas, poné null
-    },
-    {
-        id: 7,
-        nombre: " prueba 7",
-        precio: 52000,
-        categoria: "hoodies",
-        imagen: "Assets/img/hoodie-negro.jpg",
-        nuevo: true,
-        cuotas: "3 y 6 cuotas sin interés"
-    }
-];
+// Función maestra que descarga y procesa los datos
+function cargarProductos() {
+    console.log("Iniciando descarga de productos...");
+    return new Promise((resolve) => {
+        Papa.parse(SHEET_URL, {
+            download: true,
+            header: true, // Usa la fila 1 como nombres de variables
+            dynamicTyping: true, // Convierte números automáticamente
+            complete: function(results) {
+                // Transformamos los datos del Excel al formato de tu web
+                window.products = results.data
+                    .filter(row => row.id) // Ignoramos filas vacías
+                    .map(row => ({
+                        id: row.id,
+                        name: row.name,
+                        price: row.price,
+                        image: imgAPI(row.image),
+                        category: row.category,
+                        // Stock inteligente leyendo tus columnas
+                        stock: {
+                            S: row.stock_s || 0,
+                            M: row.stock_m || 0,
+                            L: row.stock_l || 0,
+                            XL: row.stock_xl || 0
+                        }
+                    }));
+                
+                console.log("✅ Inventario cargado:", window.products);
+                
+                // AVISAR A LA PÁGINA QUE LOS DATOS LLEGARON
+                // Si estamos en el inicio (catálogo), actualizar la vista
+                if (typeof renderShop === 'function') renderShop();
+                
+                // Si estamos en el detalle de producto, actualizar la info
+                if (typeof loadProductDetail === 'function') loadProductDetail();
 
-// NO BORRAR ESTA LÍNEA FINAL (Es necesaria para que funcione la web)
- window.productos = productos; 
+                resolve(window.products);
+            },
+            error: function(err) {
+                console.error("❌ Error al leer Google Sheet:", err);
+            }
+        });
+    });
+}
 
+// Arrancamos la carga apenas se lee el archivo
+cargarProductos();
