@@ -11,37 +11,26 @@ const imgAPI = (ruta) => {
 };
 
 function cargarProductos() {
-    console.log("Descargando Excel...");
+    // AVISO 1: Si falta la librería
+    if (typeof Papa === 'undefined') {
+        alert("ERROR: Falta PapaParse en el HTML. Revisá los scripts.");
+        return;
+    }
 
     Papa.parse(SHEET_URL, {
         download: true,
         header: true,
         dynamicTyping: true,
         complete: function(results) {
-            // 🔎 MODO ESPÍA ACTIVADO
-            
-            // 1. Ver qué columnas detectó
-            const columnas = results.meta.fields;
-            
-            // 2. Ver la primera fila cruda (sin filtros)
-            const primeraFila = results.data[0];
+            // AVISO 2: Éxito
+            console.log("Datos crudos:", results.data);
 
-            // 3. Mostrar el reporte en pantalla
-            alert(`🔍 REPORTE DE GOOGLE:
-            
-            Columnas encontradas: 
-            ${JSON.stringify(columnas)}
-            
-            Datos de la Fila 1:
-            ${JSON.stringify(primeraFila)}`);
-
-            // Intentamos cargar igual por si acaso
             window.products = results.data
-                .filter(row => row.id) 
+                .filter(row => row.id) // Ignorar filas vacías
                 .map(row => ({
                     id: row.id,
                     name: row.name,
-                    price: Number(row.price),
+                    price: Number(row.price), // Aseguramos que sea número
                     image: imgAPI(row.image),
                     category: row.category,
                     stock: {
@@ -52,12 +41,15 @@ function cargarProductos() {
                     }
                 }));
             
-            if (window.products.length > 0) {
-                if (typeof renderShop === 'function') renderShop();
-            }
+            // ¡ESTE CARTEL TE VA A CONFIRMAR SI ANDA!
+            alert(`¡Conectado! Se cargaron ${window.products.length} productos.`);
+            
+            if (typeof renderShop === 'function') renderShop();
+            if (typeof loadProductDetail === 'function') loadProductDetail();
         },
         error: function(err) {
-            alert("Error de conexión con Google.");
+            // AVISO 3: Falló la conexión
+            alert("Error al leer el Excel. Google no responde.");
         }
     });
 }
