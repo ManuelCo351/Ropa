@@ -67,93 +67,78 @@ document.addEventListener("DOMContentLoaded", () => {
     const hiddenElements = document.querySelectorAll(".reveal-text");
     hiddenElements.forEach(el => observer.observe(el));
 });
-    /* ==============================================
-       5. LÓGICA DEL SHOP (Renderizado y Filtros)
-       ============================================== */
-    
-    const productsContainer = document.getElementById("products-container");
+
+/* ==============================================
+   5. LÓGICA DEL SHOP (Renderizado y Filtros - VERSIÓN GOOGLE SHEETS)
+   ============================================== */
+
+// Esta función se llama desde products.js cuando llegan los datos
+window.renderShop = (filtro = 'todos') => {
+    const container = document.getElementById('products-container');
     const filterBtns = document.querySelectorAll(".filter-btn");
+    
+    // Si no estamos en el inicio, no hacemos nada
+    if (!container) return;
 
-    // A. Función para dar formato de precio argentino ($ 25.000)
-    const formatPrice = (price) => {
-        return new Intl.NumberFormat('es-AR', {
-            style: 'currency',
-            currency: 'ARS',
-            minimumFractionDigits: 0
-        }).format(price);
-    };
+    // 1. Limpiamos
+    container.innerHTML = "";
 
-    // B. Función Principal: Pintar los productos en pantalla
-    function renderProducts(listaProductos) {
-        // 1. Limpiamos el contenedor por si tenía cosas viejas
-        if (!productsContainer) return; // Protección por si no estamos en la home
-        productsContainer.innerHTML = "";
+    // 2. Filtramos la lista global 'window.products'
+    let productosAmostrar = window.products;
 
-        // 2. Si no hay productos (ej: filtro vacío), mostramos mensaje
-        if (listaProductos.length === 0) {
-            productsContainer.innerHTML = `<p style="text-align:center; width:100%; grid-column: 1/-1;">No hay productos en esta categoría aún.</p>`;
-            return;
-        }
+    if (filtro !== 'todos') {
+        // Filtramos comparando la categoría del Excel (en minúscula)
+        productosAmostrar = window.products.filter(p => 
+            p.category && p.category.toLowerCase() === filtro.toLowerCase()
+        );
+    }
 
-        // 3. Recorremos la lista y creamos el HTML de cada uno
-        listaProductos.forEach(producto => {
-            
-            // Lógica para la etiqueta "NUEVO"
-            const etiquetaNuevo = producto.nuevo 
-                ? '<span class="badge-new">NUEVO</span>' 
-                : '';
+    // 3. Si no hay nada, mensaje de error
+    if (productosAmostrar.length === 0) {
+        container.innerHTML = `<p style="text-align:center; width:100%; grid-column: 1/-1; padding: 40px;">Cargando productos o categoría vacía...</p>`;
+        return;
+    }
 
-            // Lógica para las cuotas (si es null no muestra nada)
-            const etiquetaCuotas = producto.cuotas 
-                ? `<span class="product-installments">${producto.cuotas}</span>` 
-                : '';
+    // 4. Dibujamos las tarjetas
+    productosAmostrar.forEach(product => {
+        // Calculamos precio bonito
+        const precioFormateado = new Intl.NumberFormat('es-AR', {
+            style: 'currency', currency: 'ARS', minimumFractionDigits: 0
+        }).format(product.price);
 
-            // Construimos la tarjeta usando Template Strings (``)
-            const tarjetaHTML = `
-                <div class="product-card reveal-text active" onclick="window.location.href='product.html?id=${producto.id}'">
-                    <div class="card-image">
-                        ${etiquetaNuevo}
-                        <img src="${producto.imagen}" alt="${producto.nombre}" loading="lazy">
+        const cardHTML = `
+            <article class="product-card reveal-text active">
+                <a href="product.html?id=${product.id}" class="product-link">
+                    <div class="img-container">
+                        <img src="${product.image}" alt="${product.name}" loading="lazy">
                     </div>
                     <div class="product-info">
-                        <h3>${producto.nombre}</h3>
-                        <p class="product-price">${formatPrice(producto.precio)}</p>
-                        ${etiquetaCuotas}
+                        <h3>${product.name}</h3>
+                        <div class="price-row">
+                            <span class="price">${precioFormateado}</span>
+                        </div>
+                        <span class="installments">3 cuotas sin interés</span>
                     </div>
-                </div>
-            `;
-
-            // Inyectamos la tarjeta en el contenedor
-            productsContainer.innerHTML += tarjetaHTML;
-        });
-    }
-
-    // C. Inicialización: Cargar todo al principio
-    // Verificamos que la variable 'productos' (del otro archivo) exista
-    if (typeof productos !== 'undefined') {
-        renderProducts(productos);
-    } else {
-        console.error("No se encontró el archivo products.js");
-    }
-
-    // D. Lógica de los Botones de Filtro
-    filterBtns.forEach(btn => {
-        btn.addEventListener("click", () => {
-            // 1. Efecto visual: Sacar clase 'active' a todos y ponerla al clickeado
-            filterBtns.forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-
-            // 2. Leer qué categoría quiere el usuario
-            const categoriaSeleccionada = btn.getAttribute("data-filter");
-
-            // 3. Filtrar el array de productos
-            if (categoriaSeleccionada === "todos") {
-                renderProducts(productos); // Mostrar todo
-            } else {
-                // Crear nueva lista solo con esa categoría
-                const filtrados = productos.filter(p => p.categoria === categoriaSeleccionada);
-                renderProducts(filtrados);
-            }
-        });
+                </a>
+            </article>
+        `;
+        container.innerHTML += cardHTML;
     });
 
+    // 5. Reactivamos los botones de filtro (solo la primera vez)
+    // Esto evita agregar el evento click mil veces
+    if (!window.filtersInitialized) {
+        filterBtns.forEach(btn => {
+            btn.onclick = (e) => {
+                // Sacar clase active a todos
+                filterBtns.forEach(b => b.classList.remove("active"));
+                // Poner active al clickeado
+                e.target.classList.add("active");
+                // Renderizar con el nuevo filtro
+                const categoria = e.target.getAttribute("data-filter");
+                window.renderShop(categoria);
+            };
+        });
+        window.filtersInitialized = true;
+    }
+};
