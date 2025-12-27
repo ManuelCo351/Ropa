@@ -44,7 +44,7 @@ module.exports = async (req, res) => {
           quantity: Number(producto.quantity),
           currency_id: 'ARS',
           unit_price: precioFinal,
-          picture_url: `https://hijo-prodigo.vercel.app/${producto.image}`
+          picture_url: `https://tienda-urb.vercel.app/${producto.image}`
         };
       });
 
