@@ -6,7 +6,7 @@ window.products = [];
 const imgAPI = (ruta) => {
     if (!ruta) return 'assets/img/placeholder.jpg';
     if (ruta.startsWith('http')) return ruta;
-    const dominio = 'https://hijo-prodigo.vercel.app/'; 
+    const dominio = 'https://tienda-urb.vercel.app/'; 
     return `https://wsrv.nl/?url=${dominio}${ruta}&output=webp&q=80`;
 };
 
