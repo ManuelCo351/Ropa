@@ -1,49 +1,46 @@
-import { MercadoPagoConfig, Preference } from 'mercadopago';
+const { MercadoPagoConfig, Preference } = require('mercadopago');
 
-// 1. CONFIGURACIÓN: CAMBIÁ ESTOS NÚMEROS A TU GUSTO
-const ENVIO_COSTO_FIJO = 8000;      // Cuánto cobrás el envío si NO es gratis (ej: $8.000)
-const ENVIO_GRATIS_DESDE = 120000;  // A partir de cuánto el envío es $0
-const MONTO_MAYORISTA = 500000;     // A partir de cuánto aplicás descuento mayorista
-const DESCUENTO_MAYORISTA = 25;     // 25% de descuento para mayoristas
-const DESCUENTO_EXTRA_EVENTO = 0;   // Poné 10, 20, etc. si querés hacer un descuento general hoy (Hot Sale)
+const ENVIO_COSTO_FIJO = 8000;
+const ENVIO_GRATIS_DESDE = 120000;
+const MONTO_MAYORISTA = 500000;
+const DESCUENTO_MAYORISTA = 25;
+const DESCUENTO_EXTRA_EVENTO = 0;
 
 const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
 
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   if (req.method === 'POST') {
-    const { items } = req.body;
-
     try {
-      // A. CALCULAMOS EL TOTAL DEL CARRITO PRIMERO
+      const { items } = req.body;
+      // IMPORTANTE: Necesitamos saber tu URL para que MP nos avise.
+      // Vercel suele darla en el 'host', si no, pone tu dominio manual abajo.
+      const protocol = req.headers['x-forwarded-proto'] || 'https';
+      const host = req.headers['x-forwarded-host'] || req.headers.host;
+      const deployUrl = `${protocol}://${host}`; 
+
+      // A. CALCULAMOS TOTAL
       let totalCarrito = 0;
       items.forEach(item => {
         totalCarrito += Number(item.price) * Number(item.quantity);
       });
 
-      // B. APLICAMOS LÓGICA DE DESCUENTOS
+      // B. DESCUENTOS
       let porcentajeDescuento = 0;
+      if (totalCarrito >= MONTO_MAYORISTA) porcentajeDescuento = DESCUENTO_MAYORISTA;
+      else if (DESCUENTO_EXTRA_EVENTO > 0) porcentajeDescuento = DESCUENTO_EXTRA_EVENTO;
 
-      // 1. ¿Es mayorista?
-      if (totalCarrito >= MONTO_MAYORISTA) {
-        porcentajeDescuento = DESCUENTO_MAYORISTA;
-      } 
-      // 2. ¿Hay un evento especial (Hot Sale) configurado arriba?
-      else if (DESCUENTO_EXTRA_EVENTO > 0) {
-        porcentajeDescuento = DESCUENTO_EXTRA_EVENTO;
-      }
-
-      // C. PROCESAMOS LOS PRODUCTOS CON EL PRECIO FINAL
+      // C. PROCESAMOS PRODUCTOS
       const itemsProcesados = items.map(producto => {
         let precioFinal = Number(producto.price);
-        
-        // Si hay descuento, lo aplicamos al precio unitario
         if (porcentajeDescuento > 0) {
           precioFinal = precioFinal - (precioFinal * (porcentajeDescuento / 100));
         }
 
+        // TRUCO: Metemos el talle en el título para leerlo después en el Webhook
+        // Ej: "Hoodie Cosecha ###M"
         return {
           id: producto.id.toString(),
-          title: producto.name,
+          title: `${producto.name} ###${producto.size}`, 
           quantity: Number(producto.quantity),
           currency_id: 'ARS',
           unit_price: precioFinal,
@@ -51,47 +48,35 @@ export default async function handler(req, res) {
         };
       });
 
-      // D. CALCULAMOS EL ENVÍO
-      // Si el total original supera el límite, costo 0. Si no, costo fijo.
-      // (Ojo: Si es mayorista, asumimos envío gratis también o podés cambiar la lógica)
+      // D. ENVÍO
       let costoEnvio = ENVIO_COSTO_FIJO;
-      
-      if (totalCarrito >= ENVIO_GRATIS_DESDE) {
-        costoEnvio = 0;
-      }
+      if (totalCarrito >= ENVIO_GRATIS_DESDE) costoEnvio = 0;
 
-      // E. CREAMOS LA PREFERENCIA
+      // E. CREAR PREFERENCIA
       const preference = new Preference(client);
       const result = await preference.create({
         body: {
           items: itemsProcesados,
-          
-          // ACÁ SE AGREGA EL COSTO DE ENVÍO
-          shipments: {
-            cost: costoEnvio,
-            mode: 'not_specified', // Pide dirección obligatoria
-          },
-
+          shipments: { cost: costoEnvio, mode: 'not_specified' },
           back_urls: {
-            success: "https://tienda-urb.vercel.app",
-            failure: "https://tienda-urb.vercel.app",
-            pending: "https://tienda-urb.vercel.app"
+            success: `${deployUrl}/`,
+            failure: `${deployUrl}/`,
+            pending: `${deployUrl}/`
           },
           auto_return: "approved",
-          // Esto sirve para que en el resumen de MP diga "Descuento aplicado" si hubo
           statement_descriptor: "TIENDA URB",
+          // ACÁ ESTÁ LA MAGIA: Le decimos a MP que nos avise a este archivo
+          notification_url: `${deployUrl}/api/webhook`
         }
       });
 
       res.status(200).json({ id: result.id });
       
     } catch (error) {
-      console.error(error);
+      console.error("Error MP:", error);
       res.status(500).json({ error: 'Error al crear la preferencia' });
     }
   } else {
-    res.setHeader('Allow', ['POST']);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
+    res.status(405).send(`Method ${req.method} Not Allowed`);
   }
-      }
-
+};
